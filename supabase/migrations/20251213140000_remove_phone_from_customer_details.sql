@@ -1,0 +1,1 @@
+ALTER TABLE public.customer_details DROP COLUMN IF EXISTS phone;

@@ -1,0 +1,1 @@
+ALTER TABLE public.instructor_details ADD COLUMN status TEXT DEFAULT 'active' NOT NULL;
