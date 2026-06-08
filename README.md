@@ -56,8 +56,8 @@ The application follows a modern three-tier architecture:
 ### 1. Clone the Repository
 
 ```bash
-git clone <repository-url>
-cd SG-Kassandra
+git clone [https://github.com/kassa-r/kiteops.git](https://github.com/kassa-r/kiteops.git)
+cd kiteops
 ```
 
 ### 2. Supabase Setup
@@ -85,14 +85,13 @@ supabase db seed
 
 ### 3. Environment Variables
 
-Create a `.env.local` file in the `app/` directory based on `app/.env.example` and fill in your Supabase project credentials.
+Create a `.env.local` file in the root directory based on `app/.env.example` and fill in your Supabase project credentials.
 
 ### 4. Frontend Installation
 
 Navigate to the `app/` directory and install dependencies:
 
 ```bash
-cd app
 npm install
 ```
 
@@ -110,7 +109,6 @@ The application will be accessible at `http://localhost:3000` (or the port speci
 
 - **Unit & Component Tests:** Run with Vitest.
   ```bash
-  cd app
   npm test
   ```
 - **End-to-End Tests:** Run with Playwright.
