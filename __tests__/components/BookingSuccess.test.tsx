@@ -1,6 +1,6 @@
 import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { BookingSuccess } from '../../components/booking/BookingSuccess';
+import { BookingSuccess } from '@/components/booking/BookingSuccess';
 
 // Mock UI components to avoid Radix Context issues
 vi.mock('@/components/ui/dialog', () => ({

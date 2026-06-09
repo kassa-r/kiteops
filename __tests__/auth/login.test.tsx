@@ -36,7 +36,7 @@ afterEach(() => {
 describe('LoginPage', () => {
   it('renders login form correctly', () => {
     render(<LoginPage />);
-    expect(screen.getByText('Welcome Back')).toBeDefined();
+    expect(screen.getByText('KiteOps')).toBeDefined();
     expect(screen.getByLabelText('Email')).toBeDefined();
     expect(screen.getByLabelText('Password')).toBeDefined();
     expect(screen.getByRole('button', { name: 'Log In' })).toBeDefined();

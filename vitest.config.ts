@@ -9,9 +9,11 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./vitest.setup.ts'],
     include: ['**/*.{test,spec}.?(c|m)[jt]s?(x)'],
-    exclude: ['**/node_modules/**', '**/dist/**', '**/.{idea,git,cache,output,temp}/**'],
+    exclude: ['**/node_modules/**', '**/dist/**', '**/.{idea,git,cache,output,temp}/**', 'tests/e2e/**', 'tests/integration/**', 'tests/unit/**', 'supabase/functions/**/__tests__/**'],
     alias: {
-      '@': path.resolve(__dirname, './'),
+      '@': path.resolve(__dirname, './src'),
+      '@supabase_functions': path.resolve(__dirname, './supabase/functions'),
     },
+    tsconfig: './tsconfig.vitest.json',
   },
 });

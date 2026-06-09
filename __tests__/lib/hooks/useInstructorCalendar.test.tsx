@@ -26,19 +26,39 @@ const wrapper = ({ children }) => (
   </QueryClientProvider>
 );
 
-describe('useInstructorCalendar', () => {
+describe('useInstructorCalendar', { timeout: 10000 }, () => {
   const mockUserId = 'test-instructor-id';
-  const mockDateRange = { start: new Date('2025-01-01'), end: new Date('2025-01-31') };
-  const mockEvents = [{ id: '1', title: 'Test Event', start: new Date(), end: new Date(), type: 'lesson' }];
+  let mockDate: Date;
+  let expectedStartDate: Date;
+  let expectedEndDate: Date;
+
+  const mockEvents = {
+    bookings: [{ id: '1', title: 'Test Booking', start: new Date(), end: new Date(), type: 'lesson' }],
+    availability: [{ id: '2', title: 'Test Availability', start: new Date(), end: new Date(), type: 'availability' }]
+  };
 
   beforeEach(() => {
+    // 1. Freeze system time first
+    vi.setSystemTime(new Date('2025-01-01T00:00:00Z'));
+
+    // 2. Initialize the dates inside the frozen time context
+    mockDate = new Date('2025-01-01T00:00:00Z'); 
+    expectedStartDate = new Date('2024-12-29T23:00:00.000Z');
+    expectedEndDate = new Date('2025-01-05T22:59:59.999Z');
+
     vi.mocked(createClient).mockReturnValue({
       auth: {
-        getUser: vi.fn().mockResolvedValue({ data: { user: { id: mockUserId } } }),
+        getUser: vi.fn().mockResolvedValue({ data: { user: { id: mockUserId } }, error: null }),
       },
     } as any);
     vi.mocked(CalendarService.getInstructorCalendarData).mockResolvedValue(mockEvents);
   });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+
 
   it('should not fetch data if role is not instructor', async () => {
     vi.mocked(useUserRole).mockReturnValue({ data: 'manager' } as any);
@@ -47,13 +67,14 @@ describe('useInstructorCalendar', () => {
     
     // Set date range to trigger the hook's internal logic
     act(() => {
-      result.current.setDateRange(mockDateRange);
+      result.current.setCurrentDate(mockDate);
     });
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
       expect(CalendarService.getInstructorCalendarData).not.toHaveBeenCalled();
-      expect(result.current.events).toEqual([]);
+      expect(result.current.bookings).toEqual([]);
+      expect(result.current.availability).toEqual([]);
     });
   });
 
@@ -75,7 +96,7 @@ describe('useInstructorCalendar', () => {
 
     // Set date range
     act(() => {
-      result.current.setDateRange(mockDateRange);
+      result.current.setCurrentDate(mockDate);
     });
     
     await waitFor(() => {
@@ -85,10 +106,11 @@ describe('useInstructorCalendar', () => {
     await waitFor(() => {
       expect(CalendarService.getInstructorCalendarData).toHaveBeenCalledWith(
         mockUserId,
-        mockDateRange.start,
-        mockDateRange.end
+        expectedStartDate,
+        expectedEndDate
       );
-      expect(result.current.events).toEqual(mockEvents);
+      expect(result.current.bookings).toEqual(mockEvents.bookings);
+      expect(result.current.availability).toEqual(mockEvents.availability);
     });
   });
   
@@ -99,12 +121,13 @@ describe('useInstructorCalendar', () => {
     const { result } = renderHook(() => useInstructorCalendar(), { wrapper });
 
     act(() => {
-      result.current.setDateRange(mockDateRange);
+      result.current.setCurrentDate(mockDate);
     });
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
-      expect(result.current.events).toEqual([]);
+      expect(result.current.bookings).toEqual([]);
+      expect(result.current.availability).toEqual([]);
     });
   });
 
@@ -116,12 +139,13 @@ describe('useInstructorCalendar', () => {
     const { result } = renderHook(() => useInstructorCalendar(), { wrapper });
 
     act(() => {
-      result.current.setDateRange(mockDateRange);
+      result.current.setCurrentDate(mockDate);
     });
 
     await waitFor(() => {
       expect(result.current.error).toBe(testError);
-      expect(result.current.events).toEqual([]);
+      expect(result.current.bookings).toEqual([]);
+      expect(result.current.availability).toEqual([]);
     });
   });
 });

@@ -18,6 +18,10 @@ describe('getBookingByToken', () => {
       functions: {
         invoke: vi.fn(),
       },
+      // Add a mock cookies object to satisfy the createBrowserClient type
+      cookies: {
+        get: vi.fn(),
+      },
     };
 
     // Ensure our mock function returns the mock client

@@ -16,21 +16,21 @@ describe('Supabase Client Initialization', () => {
     delete process.env.NEXT_PUBLIC_SUPABASE_URL;
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'mock-key';
 
-    await expect(import('../../lib/db')).rejects.toThrow('Missing Supabase environment variables');
+    await expect(import('@/lib/db')).rejects.toThrow('Your project\'s URL and Key are required to create a Supabase client!');
   });
 
   it('throws error if NEXT_PUBLIC_SUPABASE_ANON_KEY is missing', async () => {
     process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://mock.supabase.co';
     delete process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-    await expect(import('../../lib/db')).rejects.toThrow('Missing Supabase environment variables');
+    await expect(import('@/lib/db')).rejects.toThrow('Your project\'s URL and Key are required to create a Supabase client!');
   });
 
   it('exports supabase client when env vars are present', async () => {
     process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://mock.supabase.co';
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'mock-key';
 
-    const { supabase } = await import('../../lib/db');
+    const { supabase } = await import('@/lib/db');
     expect(supabase).toBeDefined();
   });
 });

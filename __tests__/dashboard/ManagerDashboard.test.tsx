@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import { ManagerDashboard } from '@/components/dashboard/ManagerDashboard';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 // Mock the hook
 vi.mock('@/lib/hooks/useManagerDashboard', () => ({
@@ -27,9 +28,15 @@ vi.mock('@/lib/hooks/useManagerDashboard', () => ({
   }),
 }));
 
+const queryClient = new QueryClient();
+
 describe('ManagerDashboard', () => {
   it('renders the dashboard title and widgets', () => {
-    render(<ManagerDashboard />);
+    render(
+      <QueryClientProvider client={queryClient}>
+        <ManagerDashboard />
+      </QueryClientProvider>
+    );
     
     expect(screen.getByRole('heading', { name: 'Manager Dashboard' })).toBeDefined();
     

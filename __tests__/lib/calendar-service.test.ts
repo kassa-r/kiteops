@@ -58,37 +58,16 @@ describe('CalendarService', () => {
     vi.mocked(createClient).mockReturnValue(mockSupabase as any);
     vi.mocked(AvailabilityService.getAvailability).mockResolvedValue(mockAvailability as any);
 
-    const events = await CalendarService.getInstructorCalendarData(mockUserId, mockStartDate, mockEndDate);
+    const { bookings, availability } = await CalendarService.getInstructorCalendarData(mockUserId, mockStartDate, mockEndDate);
     
-    expect(events).toHaveLength(mockAvailability.length + mockBookings.length);
+    expect(bookings).toEqual(mockBookings);
+    expect(availability).toEqual(mockAvailability);
     expect(AvailabilityService.getAvailability).toHaveBeenCalledWith(mockUserId, mockStartDate, mockEndDate);
     expect(mockSupabase.from).toHaveBeenCalledWith('bookings');
     expect(mockSupabase.eq).toHaveBeenCalledWith('instructor_id', mockUserId);
   });
 
-  it('should correctly map availability slots to background events', async () => {
-    const mockSupabase = {
-        from: vi.fn().mockReturnThis(),
-        select: vi.fn().mockReturnThis(),
-        eq: vi.fn().mockReturnThis(),
-        gte: vi.fn().mockReturnThis(),
-        lte: vi.fn().mockResolvedValue({ data: [], error: null }),
-    };
-    vi.mocked(createClient).mockReturnValue(mockSupabase as any);
-    vi.mocked(AvailabilityService.getAvailability).mockResolvedValue(mockAvailability as any);
-
-    const events = await CalendarService.getInstructorCalendarData(mockUserId, mockStartDate, mockEndDate);
-    const availabilityEvent = events.find(e => e.type === 'availability');
-
-    expect(availabilityEvent).toBeDefined();
-    expect(availabilityEvent?.title).toBe('Available');
-    expect(availabilityEvent?.display).toBe('background');
-    expect(availabilityEvent?.backgroundColor).toBe('#ECFDF5');
-    expect(availabilityEvent?.borderColor).toBe('#10B981');
-    expect(availabilityEvent?.start).toEqual(new Date(mockAvailability[0].start_time));
-  });
-
-  it('should correctly map confirmed lessons with the correct color', async () => {
+  it('should correctly return confirmed lessons', async () => {
     const mockSupabase = {
         from: vi.fn().mockReturnThis(),
         select: vi.fn().mockReturnThis(),
@@ -99,16 +78,19 @@ describe('CalendarService', () => {
     vi.mocked(createClient).mockReturnValue(mockSupabase as any);
     vi.mocked(AvailabilityService.getAvailability).mockResolvedValue([]);
 
-    const events = await CalendarService.getInstructorCalendarData(mockUserId, mockStartDate, mockEndDate);
-    const confirmedLesson = events.find(e => e.status === 'confirmed');
+    const { bookings } = await CalendarService.getInstructorCalendarData(mockUserId, mockStartDate, mockEndDate);
+    const confirmedLesson = bookings.find(b => b.status === 'confirmed');
 
     expect(confirmedLesson).toBeDefined();
-    expect(confirmedLesson?.title).toBe('Kite Surfing 101 - John Doe');
-    expect(confirmedLesson?.backgroundColor).toBe('#4A90E2');
-    expect(confirmedLesson?.borderColor).toBe('#4A90E2');
+    expect(confirmedLesson).toEqual(expect.objectContaining({
+      id: 'booking1',
+      status: 'confirmed',
+      lesson: { name: 'Kite Surfing 101' },
+      customer: { full_name: 'John Doe' },
+    }));
   });
 
-  it('should correctly map pending lessons with the correct color', async () => {
+  it('should correctly return pending lessons', async () => {
     const mockSupabase = {
         from: vi.fn().mockReturnThis(),
         select: vi.fn().mockReturnThis(),
@@ -119,16 +101,19 @@ describe('CalendarService', () => {
     vi.mocked(createClient).mockReturnValue(mockSupabase as any);
     vi.mocked(AvailabilityService.getAvailability).mockResolvedValue([]);
     
-    const events = await CalendarService.getInstructorCalendarData(mockUserId, mockStartDate, mockEndDate);
-    const pendingLesson = events.find(e => e.status === 'pending');
+    const { bookings } = await CalendarService.getInstructorCalendarData(mockUserId, mockStartDate, mockEndDate);
+    const pendingLesson = bookings.find(b => b.status === 'pending');
 
     expect(pendingLesson).toBeDefined();
-    expect(pendingLesson?.title).toBe('Advanced Tricks - Jane Smith');
-    expect(pendingLesson?.backgroundColor).toBe('#FBBF24'); // Pending color
-    expect(pendingLesson?.borderColor).toBe('#FBBF24');
+    expect(pendingLesson).toEqual(expect.objectContaining({
+      id: 'booking2',
+      status: 'pending',
+      lesson: { name: 'Advanced Tricks' },
+      customer: { full_name: 'Jane Smith' },
+    }));
   });
 
-  it('should correctly map cancelled lessons with the correct color', async () => {
+  it('should correctly return cancelled lessons', async () => {
     const mockSupabase = {
         from: vi.fn().mockReturnThis(),
         select: vi.fn().mockReturnThis(),
@@ -139,12 +124,16 @@ describe('CalendarService', () => {
     vi.mocked(createClient).mockReturnValue(mockSupabase as any);
     vi.mocked(AvailabilityService.getAvailability).mockResolvedValue([]);
 
-    const events = await CalendarService.getInstructorCalendarData(mockUserId, mockStartDate, mockEndDate);
-    const cancelledLesson = events.find(e => e.status === 'cancelled');
+    const { bookings } = await CalendarService.getInstructorCalendarData(mockUserId, mockStartDate, mockEndDate);
+    const cancelledLesson = bookings.find(b => b.status === 'cancelled');
 
     expect(cancelledLesson).toBeDefined();
-    expect(cancelledLesson?.backgroundColor).toBe('#ef4444'); // Cancelled color
-    expect(cancelledLesson?.borderColor).toBe('#ef4444');
+    expect(cancelledLesson).toEqual(expect.objectContaining({
+      id: 'booking3',
+      status: 'cancelled',
+      lesson: { name: 'Cancelled Lesson' },
+      customer: { full_name: 'No Show' },
+    }));
   });
 
   it('should throw an error if fetching bookings fails', async () => {

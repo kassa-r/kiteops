@@ -8,6 +8,7 @@ import { Availability } from '@/lib/availability-service';
 vi.mock('lucide-react', () => ({
   ChevronLeft: () => <span data-testid="chevron-left" />,
   ChevronRight: () => <span data-testid="chevron-right" />,
+  Plus: () => <span data-testid="plus-icon" />,
 }));
 
 describe('ManagerCalendar', () => {
